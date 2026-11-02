@@ -270,7 +270,7 @@
     <p class="shufflehint">Tap or swipe the card to shuffle</p>
     <div class="foot" id="foot" hidden>
       <p class="where" id="where"></p>
-      <a class="go" id="go" href="#" target="_blank" rel="noopener">Get directions</a>
+      <a class="go" id="go" href="#" target="_blank" rel="noopener">View location</a>
     </div>
   </section>
 </main>
@@ -328,7 +328,7 @@
   });
 
   function mapLink(s) {
-    if (s.dataset.ll) return 'https://www.google.com/maps/dir/?api=1&destination=' + s.dataset.ll + '&destination_place_id=' + s.dataset.pid;
+    if (s.dataset.ll) return 'https://www.google.com/maps/search/?api=1&query=' + s.dataset.ll + '&query_place_id=' + s.dataset.pid;
     return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.dataset.q);
   }
   function setActive(i, dir, prev) {
@@ -394,7 +394,7 @@
     if (!s.dataset.q) return;
     var d = document.createElement('div'); d.className = 'sdir';
     var p = document.createElement('p'); p.className = 'where'; p.textContent = s.dataset.where;
-    var a = document.createElement('a'); a.className = 'go'; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Get directions';
+    var a = document.createElement('a'); a.className = 'go'; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'View location';
     a.href = mapLink(s);
     d.appendChild(p); d.appendChild(a); s.appendChild(d);
   });
