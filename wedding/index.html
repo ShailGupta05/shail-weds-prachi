@@ -448,12 +448,18 @@
       c: colors[(Math.random() * colors.length) | 0], a: .5 + Math.random() * .45
     };
   }
-  function frame() {
+  var rafId = 0, lastTick = 0;
+  function frame(now) {
     if (!running) return;
+    now = now || performance.now();
+    var k = lastTick ? Math.min(Math.max((now - lastTick) / 16.67, 0), 3) : 1;  // same speed at 30, 60 or 120 fps
+    lastTick = now;
+    rafId = requestAnimationFrame(frame);   // book the next frame first so one bad frame can't stop the loop
+    if (!W || !H) size();
     ctx.clearRect(0, 0, W, H);
     for (var i = 0; i < petals.length; i++) {
       var p = petals[i];
-      p.y += p.vy; p.sw += p.ss; p.x += Math.sin(p.sw) * p.amp; p.r += p.vr;
+      p.y += p.vy * k; p.sw += p.ss * k; p.x += Math.sin(p.sw) * p.amp * k; p.r += p.vr * k;
       if (p.y > H + 20) petals[i] = p = make(false);
       ctx.save();
       ctx.translate(p.x, p.y);
@@ -466,8 +472,21 @@
       ctx.fill();
       ctx.restore();
     }
-    requestAnimationFrame(frame);
   }
+  /* restart the loop if the phone froze it (switching apps, coming back from Maps, locking the screen) */
+  function kickPetals() {
+    if (!running || document.hidden) return;
+    if (performance.now() - lastTick > 600) {
+      cancelAnimationFrame(rafId);
+      lastTick = 0;
+      size();
+      rafId = requestAnimationFrame(frame);
+    }
+  }
+  document.addEventListener('visibilitychange', kickPetals);
+  window.addEventListener('pageshow', kickPetals);
+  window.addEventListener('focus', kickPetals);
+  setInterval(kickPetals, 1500);
   function startPetals() {
     if (reduce || running) return;
     size();
@@ -475,7 +494,9 @@
     petals = [];
     for (var i = 0; i < count; i++) { var p = make(false); p.y = -Math.random() * H; petals.push(p); }
     running = true;
-    requestAnimationFrame(frame);
+    lastTick = 0;
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(frame);
   }
   window.addEventListener('resize', function () { if (running) size(); });
 
@@ -510,6 +531,9 @@
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) music.pause();
     else if (!muted && intro.hidden) playMusic();
+  });
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted && !muted && intro.hidden) playMusic();
   });
   showSound();
 
