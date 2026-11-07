@@ -41,6 +41,7 @@
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
+  html { overflow: hidden; overscroll-behavior: none; }   /* one-screen page: the tilted back card must not let the page wobble sideways */
   body {
     margin: 0;
     background: radial-gradient(120% 90% at 50% 0%, var(--ground) 0%, var(--ground-deep) 100%) var(--ground-deep);
